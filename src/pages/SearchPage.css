@@ -1,7 +1,12 @@
 /* Search Page Styles */
 .search-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: 
+        linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%),
+        url('/images/fraport_tav_antalya_airport_cover.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     padding: 2rem 0;
 }
 
@@ -32,7 +37,7 @@
 
 /* Filters Section */
 .filters-section {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 2rem;
@@ -101,7 +106,7 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 1.5rem;
@@ -136,7 +141,7 @@
 }
 
 .flight-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 1.5rem;
@@ -349,7 +354,7 @@
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.1);

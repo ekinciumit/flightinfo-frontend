@@ -1,7 +1,12 @@
 /* BookingsPage Styles */
 .bookings-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: 
+        linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%),
+        url('/images/fraport_tav_antalya_airport_cover.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     padding: 2rem 0;
     position: relative;
     overflow: hidden;
@@ -46,9 +51,9 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 2rem;
     text-align: center;
