@@ -3,7 +3,7 @@ import type { InternalAxiosRequestConfig } from "axios";
 
 // 🔹 Axios instance oluştur
 const api = axios.create({
-    baseURL: "http://localhost:5000/api", // ✅ backend API adresin (HTTP)
+    baseURL: "http://localhost:5172/api", // ✅ backend API adresin (HTTP)
     headers: {
         "Content-Type": "application/json",
     },
