@@ -192,7 +192,7 @@ function HomePage() {
                 </div>
             </section>
 
-            {/* Search Form */}
+            {/* Search Section */}
             <section className="search-section">
                 <div className="search-container">
                     <form onSubmit={handleSearch} className="search-form">

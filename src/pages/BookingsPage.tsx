@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { getUserReservations, cancelReservation, restoreReservation, type Reservation } from "../services/flightService";
 import "./BookingsPage.css";
 
@@ -188,37 +187,6 @@ function BookingsPage() {
                       <p>Geçmiş ve aktif rezervasyonlarınız</p>
                   </div>
 
-                  {/* Stats Cards */}
-                  <div className="stats-grid">
-                      <div className="stat-card">
-                          <div className="stat-icon">✈️</div>
-                          <div className="stat-content">
-                              <h3>{reservations.length}</h3>
-                              <p>Toplam Rezervasyon</p>
-                          </div>
-                      </div>
-                      <div className="stat-card">
-                          <div className="stat-icon">✅</div>
-                          <div className="stat-content">
-                              <h3>{reservations.filter(r => r.status === "Active").length}</h3>
-                              <p>Aktif</p>
-                          </div>
-                      </div>
-                      <div className="stat-card">
-                          <div className="stat-icon">❌</div>
-                          <div className="stat-content">
-                              <h3>{reservations.filter(r => r.status === "Cancelled").length}</h3>
-                              <p>İptal Edilen</p>
-                          </div>
-                      </div>
-                      <div className="stat-card">
-                          <div className="stat-icon">📅</div>
-                          <div className="stat-content">
-                              <h3>{reservations.filter(r => new Date(r.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length}</h3>
-                              <p>Son 30 Gün</p>
-                          </div>
-                      </div>
-                  </div>
 
                 {/* Filtreleme Butonları */}
                 <div className="filter-tabs">
@@ -355,20 +323,6 @@ function BookingsPage() {
                     </div>
                 )}
 
-                {/* Quick Actions */}
-                <div className="quick-actions">
-                    <h2>Hızlı İşlemler</h2>
-                    <div className="actions-grid">
-                        <Link to="/" className="action-card">
-                            <span className="action-icon">🔍</span>
-                            <span>Yeni Uçuş Ara</span>
-                        </Link>
-                        <Link to="/dashboard" className="action-card">
-                            <span className="action-icon">📊</span>
-                            <span>Dashboard</span>
-                        </Link>
-                    </div>
-                </div>
             </div>
         </div>
     );
