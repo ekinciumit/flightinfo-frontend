@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { type Flight, createReservation } from "../services/flightService";
+import { type FlightWithPrice, createReservation } from "../services/flightService";
 import "./SearchResults.css";
 
 function SearchResults() {
     const location = useLocation();
     const navigate = useNavigate();
-    const [searchResults, setSearchResults] = useState<{flights: Flight[], totalCount: number} | null>(null);
+    const [searchResults, setSearchResults] = useState<{flights: FlightWithPrice[], totalCount: number} | null>(null);
     const [searchParams, setSearchParams] = useState<any>(null);
-    const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+    const [selectedFlight, setSelectedFlight] = useState<FlightWithPrice | null>(null);
     const [showBookingForm, setShowBookingForm] = useState(false);
     const [isBooking, setIsBooking] = useState(false);
 
@@ -22,7 +22,7 @@ function SearchResults() {
         }
     }, [location.state, navigate]);
 
-    const handleBookFlight = async (flight: Flight) => {
+    const handleBookFlight = async (flight: FlightWithPrice) => {
         setSelectedFlight(flight);
         setShowBookingForm(true);
     };
@@ -101,7 +101,12 @@ function SearchResults() {
                                     <p>{flight.flightNumber}</p>
                                 </div>
                                 <div className="price">
-                                    <span className="price-amount">₺{Math.floor(Math.random() * 500) + 200}</span>
+                                    <span className="price-amount">
+                                        {flight.prices.length > 0 ? 
+                                            `${flight.prices[0].price} ${flight.prices[0].currency}` : 
+                                            'Fiyat Yok'
+                                        }
+                                    </span>
                                     <span className="price-per-person">kişi başı</span>
                                 </div>
                             </div>
@@ -115,7 +120,12 @@ function SearchResults() {
                                     </div>
 
                                     <div className="flight-path">
-                                        <div className="duration">2h 30m</div>
+                                        <div className="duration">
+                                            {flight.duration ? 
+                                                `${Math.floor(flight.duration / 60)}h ${flight.duration % 60}m` : 
+                                                'Hesaplanıyor...'
+                                            }
+                                        </div>
                                         <div className="stops">Direkt</div>
                                     </div>
 
@@ -133,7 +143,12 @@ function SearchResults() {
                                     </div>
                                     <div className="info-item">
                                         <span className="label">Kalan Koltuk:</span>
-                                        <span className="value">{Math.floor(Math.random() * 50) + 10}</span>
+                                        <span className="value">
+                                            {flight.prices.length > 0 ? 
+                                                flight.prices.reduce((total, price) => total + price.availableSeats, 0) : 
+                                                'Bilinmiyor'
+                                            }
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -184,7 +199,12 @@ function SearchResults() {
                             <h4>FlightInfo Airlines - {selectedFlight.flightNumber}</h4>
                             <p>{selectedFlight.origin} → {selectedFlight.destination}</p>
                             <p>{formatDate(selectedFlight.departureTime)} - {formatTime(selectedFlight.departureTime)}</p>
-                            <p className="price">₺{Math.floor(Math.random() * 500) + 200}</p>
+                            <p className="price">
+                                {selectedFlight.prices.length > 0 ? 
+                                    `${selectedFlight.prices[0].price} ${selectedFlight.prices[0].currency}` : 
+                                    'Fiyat Yok'
+                                }
+                            </p>
                         </div>
 
                         <form onSubmit={handleBookingSubmit} className="booking-form">

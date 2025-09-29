@@ -30,6 +30,12 @@
     height: 70px;
 }
 
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .nav-logo {
     display: flex;
     align-items: center;
@@ -41,6 +47,16 @@
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
+    animation: logoFloat 2s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-8px) scale(1.05);
+    }
 }
 
 .nav-logo::before {
@@ -66,18 +82,69 @@
 .logo-icon {
     font-size: 2rem;
     transition: transform 0.3s ease;
+    animation: planeFly 4s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+    position: relative;
+}
+
+.logo-icon::after {
+    content: '✈️';
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.3;
+    animation: planeTrail 4s linear infinite;
+}
+
+@keyframes planeTrail {
+    0% {
+        transform: translateX(-20px) scale(0.5);
+        opacity: 0;
+    }
+    25% {
+        transform: translateX(-10px) scale(0.7);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateX(0px) scale(0.9);
+        opacity: 0.2;
+    }
+    75% {
+        transform: translateX(10px) scale(0.7);
+        opacity: 0.1;
+    }
+    100% {
+        transform: translateX(20px) scale(0.5);
+        opacity: 0;
+    }
+}
+
+@keyframes planeFly {
+    0% {
+        transform: translateX(-15px) translateY(0px) rotate(-10deg) scale(0.8);
+        opacity: 0.7;
+    }
+    25% {
+        transform: translateX(0px) translateY(-5px) rotate(0deg) scale(1.1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(15px) translateY(-3px) rotate(5deg) scale(1);
+        opacity: 1;
+    }
+    75% {
+        transform: translateX(8px) translateY(2px) rotate(3deg) scale(0.9);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateX(20px) translateY(0px) rotate(8deg) scale(0.7);
+        opacity: 0.6;
+    }
 }
 
 .nav-logo:hover .logo-icon {
     transform: rotate(15deg) scale(1.1);
-}
-
-.logo-icon {
-    font-size: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    animation-play-state: paused;
 }
 
 .logo-text {
@@ -85,6 +152,18 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: textGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    0% {
+        filter: brightness(1);
+        text-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
+    }
+    100% {
+        filter: brightness(1.3);
+        text-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(102, 126, 234, 0.4);
+    }
 }
 
 .nav-menu {
@@ -99,12 +178,26 @@
 .nav-link {
     text-decoration: none;
     color: #333;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    animation: navLinkGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes navLinkGlow {
+    0% {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    100% {
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    }
 }
 
 .nav-link::before {
@@ -124,9 +217,13 @@
 
 .nav-link:hover {
     color: #667eea;
-    background: #f8f9ff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.4),
+        0 4px 15px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+    animation-play-state: paused;
 }
 
 .nav-link.register {
@@ -145,29 +242,71 @@
 
 .nav-user {
     color: #667eea;
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 8px 16px;
-    background: #f8f9ff;
-    border-radius: 20px;
-    border: 1px solid #e0e0e0;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 25px;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    white-space: nowrap;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    animation: userPulse 2s ease-in-out infinite;
+}
+
+@keyframes userPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+}
+
+.nav-user:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.4),
+        0 4px 15px rgba(102, 126, 234, 0.2);
+    animation-play-state: paused;
 }
 
 .nav-button {
-    background: #ff4757;
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 25px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+    animation: buttonPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+    }
 }
 
 .nav-button:hover {
-    background: #ff3742;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+    background: linear-gradient(135deg, #ff3742 0%, #ff2d3a 100%);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 8px 25px rgba(255, 71, 87, 0.5),
+        0 4px 15px rgba(255, 71, 87, 0.3);
+    animation-play-state: paused;
 }
 
 .nav-toggle {

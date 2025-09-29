@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getAllFlights } from "../services/flightService";
+import { getAllFlightsWithPrices } from "../services/flightService";
 import { getAllCountries, getCountryCities, getCityAirports, type Country, type City, type Airport } from "../services/locationService";
 import "./HomePage.css";
 
@@ -135,8 +135,8 @@ function HomePage() {
 
         try {
             // Form validasyonu
-            if (!searchData.fromCountry || !searchData.fromCity || !searchData.toCountry || !searchData.toCity || !searchData.departureDate) {
-                setError("Lütfen tüm gerekli alanları doldurun");
+            if (!searchData.fromCountry || !searchData.fromCity || !searchData.toCountry || !searchData.toCity) {
+                setError("Lütfen gerekli alanları doldurun (Nereden, Nereye)");
                 setIsLoading(false);
                 return;
             }
@@ -147,21 +147,117 @@ function HomePage() {
                 return;
             }
 
+            // Tarih opsiyonel - eğer tarih seçilmediyse tüm tarihleri göster
+            if (!searchData.departureDate) {
+                console.log("Tarih seçilmedi - tüm tarihlerdeki uçuşlar gösterilecek");
+            }
+
             // Backend'den tüm uçuşları çek ve filtrele
-            const allFlights = await getAllFlights();
+            const allFlights = await getAllFlightsWithPrices();
             
             // Arama kriterlerine göre filtrele
             const filteredFlights = allFlights.filter(flight => {
-                const matchesOrigin = flight.origin.toLowerCase().includes(searchData.fromCity.toLowerCase());
-                const matchesDestination = flight.destination.toLowerCase().includes(searchData.toCity.toLowerCase());
+                // Şehir eşleştirmesi (daha esnek)
+                const fromCityLower = searchData.fromCity.toLowerCase();
+                const toCityLower = searchData.toCity.toLowerCase();
+                const originLower = flight.origin.toLowerCase();
+                const destinationLower = flight.destination.toLowerCase();
                 
-                // Tarih kontrolü (basit)
-                const flightDate = new Date(flight.departureTime).toDateString();
-                const searchDate = new Date(searchData.departureDate).toDateString();
-                const matchesDate = flightDate === searchDate;
+                // Şehir eşleştirmesi (Türkçe-İngilizce) - Final
+                const cityMappings: { [key: string]: string[] } = {
+                    'izmir': ['izmir', 'adb'],
+                    'istanbul': ['istanbul', 'ist', 'saw'],
+                    'ankara': ['ankara', 'esb'],
+                    'antalya': ['antalya', 'ayt'],
+                    'trabzon': ['trabzon'],
+                    'adana': ['adana'],
+                    'gaziantep': ['gaziantep'],
+                    'kayseri': ['kayseri'],
+                    'samsun': ['samsun'],
+                    'berlin': ['berlin', 'ber', 'ber'],
+                    'paris': ['paris', 'cdg'],
+                    'london': ['london', 'lhr'],
+                    'madrid': ['madrid', 'mad'],
+                    'rome': ['rome', 'fco'],
+                    'amsterdam': ['amsterdam', 'ams'],
+                    'frankfurt': ['frankfurt', 'fra'],
+                    'vienna': ['vienna', 'vie'],
+                    'zurich': ['zurich'],
+                    'dubai': ['dubai'],
+                    'doha': ['doha'],
+                    'tokyo': ['tokyo'],
+                    'seoul': ['seoul'],
+                    'singapore': ['singapore'],
+                    'bangkok': ['bangkok'],
+                    'new york': ['new york'],
+                    'los angeles': ['los angeles'],
+                    'chicago': ['chicago'],
+                    'miami': ['miami']
+                };
+                
+                const normalizeCity = (city: string) => {
+                    // Türkçe karakterleri normalize et - DÜZELTİLMİŞ
+                    const turkishChars: { [key: string]: string } = {
+                        'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+                        'Ç': 'c', 'Ğ': 'g', 'İ': 'i', 'Ö': 'o', 'Ş': 's', 'Ü': 'u',
+                        'i̇': 'i', 'İ': 'i' // Dotted İ karakteri için
+                    };
+                    
+                    let normalized = city.toLowerCase().trim();
+                    
+                    // Türkçe karakterleri değiştir
+                    for (const [turkish, english] of Object.entries(turkishChars)) {
+                        normalized = normalized.replace(new RegExp(turkish, 'g'), english);
+                    }
+                    
+                    // Şehir eşleştirmesi
+                    for (const [key, values] of Object.entries(cityMappings)) {
+                        if (values.some(v => normalized === v || normalized.includes(v) || v.includes(normalized))) {
+                            return key;
+                        }
+                    }
+                    return normalized;
+                };
+                
+                const normalizedFromCity = normalizeCity(fromCityLower);
+                const normalizedToCity = normalizeCity(toCityLower);
+                const normalizedOrigin = normalizeCity(originLower);
+                const normalizedDestination = normalizeCity(destinationLower);
+                
+                // Basit ve etkili eşleştirme (Türkçe karakterler normalize edildikten sonra)
+                const matchesOrigin = normalizedOrigin === normalizedFromCity || 
+                                    originLower.includes(fromCityLower) || 
+                                    fromCityLower.includes(originLower);
+                                    
+                const matchesDestination = normalizedDestination === normalizedToCity || 
+                                         destinationLower.includes(toCityLower) || 
+                                         toCityLower.includes(destinationLower);
+                
+                // Tarih kontrolü (opsiyonel)
+                let matchesDate = true; // Varsayılan olarak tarih eşleşir
+                
+                if (searchData.departureDate) {
+                    const flightDate = new Date(flight.departureTime);
+                    const searchDate = new Date(searchData.departureDate);
+                    matchesDate = flightDate.getFullYear() === searchDate.getFullYear() &&
+                                flightDate.getMonth() === searchDate.getMonth() &&
+                                flightDate.getDate() === searchDate.getDate();
+                }
+                
+                console.log(`Uçuş: ${flight.flightNumber}, Origin: ${flight.origin}, Destination: ${flight.destination}, Date: ${flight.departureTime}`);
+                console.log(`Arama: From: ${searchData.fromCity}, To: ${searchData.toCity}, Date: ${searchData.departureDate}`);
+                console.log(`Normalize: From: ${normalizedFromCity}, To: ${normalizedToCity}, Origin: ${normalizedOrigin}, Destination: ${normalizedDestination}`);
+                console.log(`Eşleşme: Origin: ${matchesOrigin}, Destination: ${matchesDestination}, Date: ${matchesDate}`);
                 
                 return matchesOrigin && matchesDestination && matchesDate;
             });
+            
+            console.log(`Toplam uçuş: ${allFlights.length}, Filtrelenmiş: ${filteredFlights.length}`);
+            
+            if (filteredFlights.length === 0) {
+                setError(`Arama kriterlerinize uygun uçuş bulunamadı. Toplam ${allFlights.length} uçuş mevcut.`);
+                return;
+            }
             
             // Arama sonuçlarını state'e kaydet ve sonuç sayfasına yönlendir
             navigate("/search-results", { 
@@ -383,17 +479,6 @@ function HomePage() {
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="cta-section">
-                <div className="container">
-                    <h2>Hemen Başlayın</h2>
-                    <p>Hesabınız yok mu? Ücretsiz kayıt olun ve avantajlardan yararlanın</p>
-                    <div className="cta-buttons">
-                        <Link to="/register" className="btn btn-primary">Kayıt Ol</Link>
-                        <Link to="/login" className="btn btn-secondary">Giriş Yap</Link>
-                    </div>
-                </div>
-            </section>
         </div>
     );
 }

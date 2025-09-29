@@ -45,10 +45,17 @@ function Navbar() {
     return (
         <nav className="navbar">
             <div className="nav-container">
-                <Link to="/" className="nav-logo">
-                    <span className="logo-icon">✈️</span>
-                    <span className="logo-text">FlightInfo</span>
-                </Link>
+                <div className="nav-left">
+                    <Link to="/" className="nav-logo">
+                        <span className="logo-icon">✈️</span>
+                        <span className="logo-text">FlightInfo</span>
+                    </Link>
+                    {isLoggedIn && (
+                        <span className="nav-user">
+                            Hoş geldin, {user?.fullName || user?.email || "Kullanıcı"}!
+                        </span>
+                    )}
+                </div>
 
                 <div className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
                     <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>
@@ -59,9 +66,6 @@ function Navbar() {
                     </Link>
                     {isLoggedIn ? (
                         <>
-                            <span className="nav-user">
-                                Hoş geldin, {user?.fullName || user?.email || "Kullanıcı"}!
-                            </span>
                             <Link to="/bookings" className="nav-link" onClick={() => setIsMenuOpen(false)}>
                                 Rezervasyonlarım
                             </Link>

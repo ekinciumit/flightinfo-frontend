@@ -1,29 +1,35 @@
 import { useState, useEffect } from "react";
-import { getAllFlights, type Flight } from "../services/flightService";
+import { getAllFlightsWithPrices, type FlightWithPrice, type FlightPrice } from "../services/flightService";
 import ConfirmationModal from "../components/ConfirmationModal";
-import { getAirlineInfo, getAirlineColor, getAirlineLogo, getAirlineName } from "../utils/airlineUtils";
+import { getAirlineLogo, getAirlineName } from "../utils/airlineUtils";
 import "./SearchPage.css";
 
 function SearchPage() {
-    const [flights, setFlights] = useState<Flight[]>([]);
-    const [filteredFlights, setFilteredFlights] = useState<Flight[]>([]);
+    const [flights, setFlights] = useState<FlightWithPrice[]>([]);
+    const [filteredFlights, setFilteredFlights] = useState<FlightWithPrice[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<"departure" | "arrival" | "status">("departure");
-    const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+    const [selectedFlight, setSelectedFlight] = useState<FlightWithPrice | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
-    const [isReserving, setIsReserving] = useState(false);
+    const [reservingFlights, setReservingFlights] = useState<Set<string>>(new Set());
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [flightToReserve, setFlightToReserve] = useState<Flight | null>(null);
+    const [flightToReserve, setFlightToReserve] = useState<FlightWithPrice | null>(null);
+    const [selectedPrice, setSelectedPrice] = useState<FlightPrice | null>(null);
 
     useEffect(() => {
         const loadFlights = async () => {
             try {
                 setIsLoading(true);
-                const allFlights = await getAllFlights();
-                setFlights(allFlights);
-                setFilteredFlights(allFlights);
+                const allFlights = await getAllFlightsWithPrices();
+                // Uçuş süresini hesapla
+                const flightsWithDuration = allFlights.map(flight => ({
+                    ...flight,
+                    duration: Math.round((new Date(flight.arrivalTime).getTime() - new Date(flight.departureTime).getTime()) / (1000 * 60))
+                }));
+                setFlights(flightsWithDuration);
+                setFilteredFlights(flightsWithDuration);
             } catch (error) {
                 console.error("Uçuşlar yüklenirken hata:", error);
                 setError("Uçuşlar yüklenirken bir hata oluştu");
@@ -41,11 +47,27 @@ function SearchPage() {
 
         // Arama terimi ile filtrele
         if (searchTerm) {
-            filtered = filtered.filter(flight => 
-                flight.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                flight.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                flight.flightNumber.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const searchLower = searchTerm.toLowerCase();
+            filtered = filtered.filter(flight => {
+                // Tek kelime araması
+                if (searchLower.includes(' ')) {
+                    // Çoklu kelime araması (örn: "izmir istanbul")
+                    const words = searchLower.split(' ').filter(word => word.length > 0);
+                    return words.some(word => 
+                        flight.origin.toLowerCase().includes(word) ||
+                        flight.destination.toLowerCase().includes(word) ||
+                        flight.flightNumber.toLowerCase().includes(word)
+                    );
+                } else {
+                    // Tek kelime araması
+                    return flight.origin.toLowerCase().includes(searchLower) ||
+                           flight.destination.toLowerCase().includes(searchLower) ||
+                           flight.flightNumber.toLowerCase().includes(searchLower) ||
+                           flight.origin.toLowerCase().startsWith(searchLower) ||
+                           flight.destination.toLowerCase().startsWith(searchLower) ||
+                           flight.flightNumber.toLowerCase().startsWith(searchLower);
+                }
+            });
         }
 
         // Sıralama
@@ -106,12 +128,12 @@ function SearchPage() {
         }
     };
 
-    const handleShowDetails = (flight: Flight) => {
+    const handleShowDetails = (flight: FlightWithPrice) => {
         setSelectedFlight(flight);
         setShowDetailsModal(true);
     };
 
-    const handleReserveFlight = (flight: Flight) => {
+    const handleReserveFlight = (flight: FlightWithPrice, price: FlightPrice) => {
         if (!localStorage.getItem("token")) {
             (window as any).showToast.error(
                 "Giriş Gerekli", 
@@ -129,6 +151,7 @@ function SearchPage() {
         }
 
         setFlightToReserve(flight);
+        setSelectedPrice(price);
         setShowConfirmModal(true);
     };
 
@@ -136,25 +159,56 @@ function SearchPage() {
         if (!flightToReserve) return;
 
         try {
-            setIsReserving(true);
+            // Rezerve edilen uçuşu set'e ekle
+            setReservingFlights(prev => new Set(prev).add(flightToReserve.flightNumber));
             setShowConfirmModal(false);
             
-            // Burada gerçek rezervasyon API çağrısı yapılacak
-            // Şimdilik mock bir rezervasyon
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated API call
+            // Gerçek rezervasyon API çağrısı
+            const response = await fetch('http://localhost:5000/api/Reservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    flightId: flightToReserve.id,
+                    flightPriceId: selectedPrice?.id,
+                    passengerName: JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Kullanıcı',
+                    passengerEmail: JSON.parse(localStorage.getItem('user') || '{}').email || 'user@example.com'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Rezervasyon yapılamadı');
+            }
+            
+            // Rezervasyon tamamlandıktan sonra set'ten çıkar
+            setReservingFlights(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(flightToReserve.flightNumber);
+                return newSet;
+            });
             
             (window as any).showToast.success(
                 "Rezervasyon Başarılı", 
-                `${flightToReserve.flightNumber} uçuşu başarıyla rezerve edildi!`
+                `${flightToReserve.flightNumber} uçuşu başarıyla rezerve edildi! Rezervasyonlarım sayfasından görüntüleyebilirsiniz.`
             );
+            
+            // Rezervasyonlarım sayfasını yenile
+            window.dispatchEvent(new CustomEvent('reservationUpdated'));
         } catch (error) {
             console.error("Rezervasyon hatası:", error);
+            // Hata durumunda da set'ten çıkar
+            setReservingFlights(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(flightToReserve.flightNumber);
+                return newSet;
+            });
             (window as any).showToast.error(
                 "Rezervasyon Hatası", 
                 "Rezervasyon sırasında bir hata oluştu!"
             );
         } finally {
-            setIsReserving(false);
             setFlightToReserve(null);
         }
     };
@@ -204,7 +258,7 @@ function SearchPage() {
                     <div className="search-box">
                         <input
                             type="text"
-                            placeholder="Uçuş numarası, kalkış veya varış yeri ara..."
+                            placeholder="Örn: TK123, İstanbul, Frankfurt, Berlin..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="search-input"
@@ -255,6 +309,17 @@ function SearchPage() {
                         <div className="empty-icon">✈️</div>
                         <h3>Arama kriterlerinize uygun uçuş bulunamadı</h3>
                         <p>Farklı arama terimleri deneyin veya filtreleri temizleyin</p>
+                        <p><strong>Arama terimi:</strong> "{searchTerm}"</p>
+                        <p><strong>Toplam uçuş:</strong> {flights.length}</p>
+                        <p><strong>Filtrelenmiş uçuş:</strong> {filteredFlights.length}</p>
+                        <div style={{marginTop: '1rem', textAlign: 'left'}}>
+                            <p><strong>Mevcut uçuşlar:</strong></p>
+                            {flights.slice(0, 5).map(flight => (
+                                <p key={flight.id} style={{fontSize: '0.9rem', margin: '0.25rem 0'}}>
+                                    {flight.flightNumber}: {flight.origin} → {flight.destination}
+                                </p>
+                            ))}
+                        </div>
                         <button 
                             onClick={() => setSearchTerm("")} 
                             className="btn btn-secondary"
@@ -305,19 +370,35 @@ function SearchPage() {
                                     </div>
                                 </div>
 
+                                {/* Fiyat Seçenekleri */}
+                                <div className="flight-prices">
+                                    <h4>Fiyat Seçenekleri:</h4>
+                                    <div className="price-options">
+                                        {flight.prices.map(price => (
+                                            <div key={price.id} className="price-option">
+                                                <div className="price-info">
+                                                    <span className="price-class">{price.class}</span>
+                                                    <span className="price-amount">{price.price} {price.currency}</span>
+                                                    <span className="available-seats">{price.availableSeats} koltuk</span>
+                                                </div>
+                                                <button 
+                                                    className="btn btn-primary btn-sm"
+                                                    onClick={() => handleReserveFlight(flight, price)}
+                                                    disabled={reservingFlights.has(flight.flightNumber) || flight.status === "Cancelled" || price.availableSeats === 0}
+                                                >
+                                                    {reservingFlights.has(flight.flightNumber) ? "Rezerve Ediliyor..." : "Rezerve Et"}
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div className="flight-actions">
                                     <button 
                                         className="btn btn-outline"
                                         onClick={() => handleShowDetails(flight)}
                                     >
                                         Detaylar
-                                    </button>
-                                    <button 
-                                        className="btn btn-primary"
-                                        onClick={() => handleReserveFlight(flight)}
-                                        disabled={isReserving || flight.status === "Cancelled"}
-                                    >
-                                        {isReserving ? "Rezerve Ediliyor..." : "Rezerve Et"}
                                     </button>
                                 </div>
                             </div>
@@ -419,11 +500,14 @@ function SearchPage() {
                                     className="btn btn-primary"
                                     onClick={() => {
                                         setShowDetailsModal(false);
-                                        handleReserveFlight(selectedFlight);
+                                        // İlk fiyat seçeneğini varsayılan olarak kullan
+                                        if (selectedFlight.prices.length > 0) {
+                                            handleReserveFlight(selectedFlight, selectedFlight.prices[0]);
+                                        }
                                     }}
-                                    disabled={isReserving || selectedFlight.status === "Cancelled"}
+                                    disabled={reservingFlights.has(selectedFlight.flightNumber) || selectedFlight.status === "Cancelled"}
                                 >
-                                    {isReserving ? "Rezerve Ediliyor..." : "Rezerve Et"}
+                                    {reservingFlights.has(selectedFlight.flightNumber) ? "Rezerve Ediliyor..." : "Rezerve Et"}
                                 </button>
                             </div>
                         </div>

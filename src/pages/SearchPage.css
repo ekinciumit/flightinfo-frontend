@@ -1,9 +1,7 @@
 /* Search Page Styles */
 .search-page {
     min-height: 100vh;
-    background: 
-        linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%),
-        url('/images/fraport_tav_antalya_airport_cover.jpg');
+    background: url('/images/fraport_tav_antalya_airport_cover.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -11,18 +9,6 @@
     position: relative;
 }
 
-.search-page::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 0;
-}
 
 .search-page .container {
     position: relative;
@@ -43,38 +29,48 @@
 }
 
 .search-header h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
     text-shadow: 
-        0 0 10px rgba(0,0,0,0.8),
-        0 0 20px rgba(0,0,0,0.6),
-        0 4px 8px rgba(0,0,0,0.7);
+        0 4px 8px rgba(0,0,0,0.6),
+        0 2px 4px rgba(0,0,0,0.4);
     color: #ffffff;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .search-header p {
-    font-size: 1.2rem;
-    opacity: 0.95;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
     text-shadow: 
         0 2px 4px rgba(0,0,0,0.6),
         0 1px 2px rgba(0,0,0,0.4);
     color: #ffffff;
     font-weight: 500;
+    text-align: center;
+    line-height: 1.4;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Filters Section */
 .filters-section {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px);
     border-radius: 24px;
     padding: 2.5rem;
     margin-bottom: 2rem;
     box-shadow: 
-        0 8px 32px rgba(0,0,0,0.2),
-        0 4px 16px rgba(0,0,0,0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+        0 8px 32px rgba(0,0,0,0.1),
+        0 4px 16px rgba(0,0,0,0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     gap: 2rem;
     align-items: center;
@@ -89,43 +85,50 @@
 .search-input {
     width: 100%;
     padding: 18px 24px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 20px;
     font-size: 1rem;
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(30px);
-    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    color: #333333 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     box-shadow: 
-        0 4px 16px rgba(0,0,0,0.02),
-        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        0 4px 16px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .search-input:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
+    color: #333333 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     box-shadow: 
-        0 8px 24px rgba(0,0,0,0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        0 8px 24px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .search-input:focus {
     outline: none;
-    border-color: rgba(102, 126, 234, 0.6);
-    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.3);
+    color: #333333 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     box-shadow: 
-        0 0 0 4px rgba(102, 126, 234, 0.1),
-        0 12px 32px rgba(0,0,0,0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        0 0 0 4px rgba(102, 126, 234, 0.2),
+        0 12px 32px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
     transform: translateY(-3px);
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    font-weight: 500;
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    font-weight: 700;
+    font-size: 1.1rem;
+    opacity: 0.9;
 }
 
 .search-input:focus {
@@ -142,27 +145,45 @@
 }
 
 .sort-options label {
-    font-weight: 600;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    font-weight: 700;
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    font-size: 1.1rem;
 }
 
 .sort-select {
     padding: 10px 15px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
-    font-size: 1rem;
-    background: rgba(255, 255, 255, 0.05);
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(20px);
-    color: white;
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.sort-select:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .sort-select:focus {
     outline: none;
-    border-color: rgba(102, 126, 234, 0.6);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.sort-select option {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333333;
+    font-weight: 600;
+    padding: 8px 12px;
 }
 
 /* Stats Section */
@@ -174,30 +195,24 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(30px);
+    background: transparent;
+    backdrop-filter: blur(50px);
     border-radius: 20px;
     padding: 2rem;
     text-align: center;
-    box-shadow: 
-        0 8px 32px rgba(0,0,0,0.05),
-        0 4px 16px rgba(0,0,0,0.02),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.01);
     box-shadow: 
-        0 16px 48px rgba(0,0,0,0.05),
-        0 8px 24px rgba(0,0,0,0.02),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 16px 48px rgba(0,0,0,0.01),
+        0 8px 24px rgba(0,0,0,0.005);
 }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-}
 
 .stat-number {
     display: block;
@@ -227,30 +242,26 @@
 }
 
 .flight-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(30px);
+    background: transparent;
+    backdrop-filter: blur(50px);
     border-radius: 24px;
     padding: 2rem;
-    box-shadow: 
-        0 8px 32px rgba(0,0,0,0.05),
-        0 4px 16px rgba(0,0,0,0.02),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .flight-card:hover {
     transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.01);
     box-shadow: 
-        0 16px 48px rgba(0,0,0,0.05),
-        0 8px 24px rgba(0,0,0,0.02),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 16px 48px rgba(0,0,0,0.01),
+        0 8px 24px rgba(0,0,0,0.005);
 }
 
-.flight-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-}
 
 /* Flight Header */
 .flight-header {
@@ -360,6 +371,109 @@
     color: #667eea;
 }
 
+.duration-text {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Flight Info */
+.flight-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 0.9rem;
+    color: white;
+    font-weight: 600;
+}
+
+/* Flight Prices */
+.flight-prices {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flight-prices h4 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.price-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.price-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.price-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.price-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.price-class {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #3498db;
+}
+
+.price-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2ecc71;
+}
+
+.available-seats {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
 /* Flight Actions */
 .flight-actions {
     display: flex;
@@ -386,6 +500,16 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    background: white !important;
+    color: #667eea !important;
+    border: 2px solid #667eea;
+}
+
+.btn-primary:focus {
+    background: white !important;
+    color: #667eea !important;
+    border: 2px solid #667eea;
+    outline: none;
 }
 
 .btn-outline {
@@ -545,12 +669,13 @@
 .modal-content {
     background: white;
     border-radius: 20px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
+    margin: 0 auto;
 }
 
 @keyframes modalSlideIn {
@@ -574,8 +699,9 @@
 
 .modal-header h2 {
     font-size: 1.5rem;
-    color: #333;
+    color: #000000 !important;
     margin: 0;
+    font-weight: 700;
 }
 
 .modal-close {
@@ -620,14 +746,16 @@
 
 .flight-info h3 {
     font-size: 1.5rem;
-    color: #333;
+    color: #000000 !important;
     margin: 0 0 0.5rem 0;
+    font-weight: 700;
 }
 
 .flight-info p {
-    color: #666;
+    color: #000000 !important;
     margin: 0;
     font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .flight-detail-info {
@@ -637,9 +765,10 @@
 }
 
 .detail-section h4 {
-    color: #333;
+    color: #000000 !important;
     margin-bottom: 1rem;
     font-size: 1.1rem;
+    font-weight: 700;
     border-bottom: 1px solid #ddd;
     padding-bottom: 0.5rem;
 }
@@ -653,14 +782,15 @@
 }
 
 .detail-item .label {
-    font-weight: 600;
-    color: #666;
-    font-size: 0.9rem;
+    font-weight: 700;
+    color: #000000 !important;
+    font-size: 1rem;
 }
 
 .detail-item .value {
-    color: #333;
-    font-weight: 500;
+    color: #000000 !important;
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 .modal-footer {
@@ -705,6 +835,8 @@
     .modal-content {
         margin: 0.5rem;
         max-height: 95vh;
+        max-width: 95%;
+        width: 95%;
     }
     
     .modal-header,

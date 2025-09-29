@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { getUserReservations, cancelReservation, restoreReservation, type Reservation } from "../services/flightService";
+import { Link } from "react-router-dom";
+import { getUserReservationsWithFlights, cancelReservation, restoreReservation, type Reservation } from "../services/flightService";
 import "./BookingsPage.css";
 
 function BookingsPage() {
@@ -10,6 +11,8 @@ function BookingsPage() {
     const [cancellingId, setCancellingId] = useState<number | null>(null);
     const [restoringId, setRestoringId] = useState<number | null>(null);
     const [activeFilter, setActiveFilter] = useState<"all" | "active" | "cancelled">("all");
+    const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     useEffect(() => {
         const loadReservations = async () => {
@@ -25,7 +28,9 @@ function BookingsPage() {
                 
                 console.log("Token mevcut:", token.substring(0, 20) + "...");
                 
-                const userReservations = await getUserReservations();
+                const userReservations = await getUserReservationsWithFlights();
+                console.log("Rezervasyon verileri:", userReservations);
+                console.log("İlk rezervasyon status:", userReservations[0]?.status, typeof userReservations[0]?.status);
                 setReservations(userReservations);
                 setFilteredReservations(userReservations);
             } catch (error: any) {
@@ -45,6 +50,17 @@ function BookingsPage() {
         };
 
         loadReservations();
+        
+        // Rezervasyon yapıldığında sayfayı yenile
+        const handleReservationUpdate = () => {
+            loadReservations();
+        };
+        
+        window.addEventListener('reservationUpdated', handleReservationUpdate);
+        
+        return () => {
+            window.removeEventListener('reservationUpdated', handleReservationUpdate);
+        };
     }, []);
 
     // Filtreleme fonksiyonu
@@ -53,27 +69,31 @@ function BookingsPage() {
         let filtered = reservations;
         
         if (filter === "active") {
-            filtered = reservations.filter(r => r.status === "Active");
+            filtered = reservations.filter(r => r.status === 1 || r.status === "Active" || r.status === "active");
         } else if (filter === "cancelled") {
-            filtered = reservations.filter(r => r.status === "Cancelled");
+            filtered = reservations.filter(r => r.status === 2 || r.status === "Cancelled" || r.status === "cancelled");
         }
         
         setFilteredReservations(filtered);
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "Active": return "#27ae60";
-            case "Cancelled": return "#e74c3c";
-            default: return "#95a5a6";
+    const getStatusColor = (status: string | number) => {
+        if (status === 1 || status === "Active" || status === "active") {
+            return "#27ae60"; // Active
+        } else if (status === 2 || status === "Cancelled" || status === "cancelled") {
+            return "#e74c3c"; // Cancelled
+        } else {
+            return "#95a5a6";
         }
     };
 
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case "Active": return "Aktif";
-            case "Cancelled": return "İptal Edildi";
-            default: return "Bilinmiyor";
+    const getStatusText = (status: string | number) => {
+        if (status === 1 || status === "Active" || status === "active") {
+            return "Aktif";
+        } else if (status === 2 || status === "Cancelled" || status === "cancelled") {
+            return "İptal Edildi";
+        } else {
+            return "Bilinmiyor";
         }
     };
 
@@ -102,7 +122,7 @@ function BookingsPage() {
             await cancelReservation(reservationId);
             
             // Rezervasyonları yeniden yükle
-            const updatedReservations = await getUserReservations();
+            const updatedReservations = await getUserReservationsWithFlights();
             setReservations(updatedReservations);
             setFilteredReservations(updatedReservations);
             
@@ -127,7 +147,7 @@ function BookingsPage() {
             await restoreReservation(reservationId);
             
             // Rezervasyonları yeniden yükle
-            const updatedReservations = await getUserReservations();
+            const updatedReservations = await getUserReservationsWithFlights();
             setReservations(updatedReservations);
             setFilteredReservations(updatedReservations);
             
@@ -138,6 +158,11 @@ function BookingsPage() {
         } finally {
             setRestoringId(null);
         }
+    };
+
+    const handleShowDetails = (reservation: Reservation) => {
+        setSelectedReservation(reservation);
+        setShowDetailsModal(true);
     };
 
     if (isLoading) {
@@ -210,7 +235,7 @@ function BookingsPage() {
                             <span className="tab-icon">✅</span>
                             <div className="tab-text">
                                 <span className="tab-title">Aktif</span>
-                                <span className="tab-count">{reservations.filter(r => r.status === "Active").length} rezervasyon</span>
+                                <span className="tab-count">{reservations.filter(r => r.status === 1 || r.status === "Active" || r.status === "active").length} rezervasyon</span>
                             </div>
                         </div>
                     </button>
@@ -222,7 +247,7 @@ function BookingsPage() {
                             <span className="tab-icon">❌</span>
                             <div className="tab-text">
                                 <span className="tab-title">İptal Edilen</span>
-                                <span className="tab-count">{reservations.filter(r => r.status === "Cancelled").length} rezervasyon</span>
+                                <span className="tab-count">{reservations.filter(r => r.status === 2 || r.status === "Cancelled" || r.status === "cancelled").length} rezervasyon</span>
                             </div>
                         </div>
                     </button>
@@ -253,8 +278,8 @@ function BookingsPage() {
                             <div key={reservation.id} className="reservation-card">
                                 <div className="reservation-header">
                                     <div className="flight-info">
-                                        <h3>{reservation.flightNumber}</h3>
-                                        <p>{reservation.origin} → {reservation.destination}</p>
+                                        <h3>{reservation.flight?.flightNumber || 'Bilinmiyor'}</h3>
+                                        <p>{reservation.flight?.origin || 'Bilinmiyor'} → {reservation.flight?.destination || 'Bilinmiyor'}</p>
                                     </div>
                                     <div 
                                         className="status-badge"
@@ -268,18 +293,18 @@ function BookingsPage() {
                                     <div className="detail-row">
                                         <div className="detail-item">
                                             <span className="label">Kalkış:</span>
-                                            <span className="value">{formatTime(reservation.departureTime)}</span>
+                                            <span className="value">{reservation.flight ? formatTime(reservation.flight.departureTime) : 'Bilinmiyor'}</span>
                                         </div>
                                         <div className="detail-item">
                                             <span className="label">Varış:</span>
-                                            <span className="value">{formatTime(reservation.arrivalTime)}</span>
+                                            <span className="value">{reservation.flight ? formatTime(reservation.flight.arrivalTime) : 'Bilinmiyor'}</span>
                                         </div>
                                     </div>
                                     
                                     <div className="detail-row">
                                         <div className="detail-item">
                                             <span className="label">Tarih:</span>
-                                            <span className="value">{formatDate(reservation.departureTime)}</span>
+                                            <span className="value">{reservation.flight ? formatDate(reservation.flight.departureTime) : 'Bilinmiyor'}</span>
                                         </div>
                                         <div className="detail-item">
                                             <span className="label">Oluşturulma:</span>
@@ -298,8 +323,13 @@ function BookingsPage() {
                                 </div>
 
                                 <div className="reservation-actions">
-                                    <button className="btn btn-secondary">Detaylar</button>
-                                    {reservation.status === "Active" && (
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={() => handleShowDetails(reservation)}
+                                    >
+                                        Detaylar
+                                    </button>
+                                    {(reservation.status === 1 || reservation.status === "Active" || reservation.status === "active") && (
                                         <button 
                                             className="btn btn-danger"
                                             onClick={() => handleCancelReservation(reservation.id)}
@@ -308,7 +338,7 @@ function BookingsPage() {
                                             {cancellingId === reservation.id ? "İptal Ediliyor..." : "İptal Et"}
                                         </button>
                                     )}
-                                    {reservation.status === "Cancelled" && (
+                                    {(reservation.status === 2 || reservation.status === "Cancelled" || reservation.status === "cancelled") && (
                                         <button 
                                             className="btn btn-success"
                                             onClick={() => handleRestoreReservation(reservation.id)}
@@ -320,6 +350,133 @@ function BookingsPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Rezervasyon Detayları Modal */}
+                {showDetailsModal && selectedReservation && (
+                    <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2>Rezervasyon Detayları</h2>
+                                <button 
+                                    className="modal-close"
+                                    onClick={() => setShowDetailsModal(false)}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                            
+                            <div className="modal-body">
+                                <div className="reservation-detail-card">
+                                    <div className="detail-header">
+                                        <h3>{selectedReservation.flight?.flightNumber || 'Bilinmiyor'}</h3>
+                                        <p>{selectedReservation.flight?.origin || 'Bilinmiyor'} → {selectedReservation.flight?.destination || 'Bilinmiyor'}</p>
+                                        <div 
+                                            className="status-badge"
+                                            style={{ backgroundColor: getStatusColor(selectedReservation.status) }}
+                                        >
+                                            {getStatusText(selectedReservation.status)}
+                                        </div>
+                                    </div>
+
+                                    <div className="detail-sections">
+                                        <div className="detail-section">
+                                            <h4>Uçuş Bilgileri</h4>
+                                            <div className="detail-grid">
+                                                <div className="detail-item">
+                                                    <span className="label">Uçuş Numarası:</span>
+                                                    <span className="value">{selectedReservation.flight?.flightNumber || 'Bilinmiyor'}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Kalkış:</span>
+                                                    <span className="value">{selectedReservation.flight?.origin || 'Bilinmiyor'}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Varış:</span>
+                                                    <span className="value">{selectedReservation.flight?.destination || 'Bilinmiyor'}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Kalkış Saati:</span>
+                                                    <span className="value">
+                                                        {selectedReservation.flight ? formatTime(selectedReservation.flight.departureTime) : 'Bilinmiyor'}
+                                                    </span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Varış Saati:</span>
+                                                    <span className="value">
+                                                        {selectedReservation.flight ? formatTime(selectedReservation.flight.arrivalTime) : 'Bilinmiyor'}
+                                                    </span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Uçuş Tarihi:</span>
+                                                    <span className="value">
+                                                        {selectedReservation.flight ? formatDate(selectedReservation.flight.departureTime) : 'Bilinmiyor'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="detail-section">
+                                            <h4>Rezervasyon Bilgileri</h4>
+                                            <div className="detail-grid">
+                                                <div className="detail-item">
+                                                    <span className="label">Rezervasyon ID:</span>
+                                                    <span className="value">#{selectedReservation.id}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Durum:</span>
+                                                    <span className="value">{getStatusText(selectedReservation.status)}</span>
+                                                </div>
+                                                <div className="detail-item">
+                                                    <span className="label">Oluşturulma Tarihi:</span>
+                                                    <span className="value">{formatDate(selectedReservation.createdAt)}</span>
+                                                </div>
+                                                {selectedReservation.cancelledAt && (
+                                                    <div className="detail-item">
+                                                        <span className="label">İptal Tarihi:</span>
+                                                        <span className="value">{formatDate(selectedReservation.cancelledAt)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="modal-footer">
+                                <button 
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowDetailsModal(false)}
+                                >
+                                    Kapat
+                                </button>
+                                {(selectedReservation.status === 1 || selectedReservation.status === "Active" || selectedReservation.status === "active") && (
+                                    <button 
+                                        className="btn btn-danger"
+                                        onClick={() => {
+                                            setShowDetailsModal(false);
+                                            handleCancelReservation(selectedReservation.id);
+                                        }}
+                                        disabled={cancellingId === selectedReservation.id}
+                                    >
+                                        {cancellingId === selectedReservation.id ? "İptal Ediliyor..." : "İptal Et"}
+                                    </button>
+                                )}
+                                {(selectedReservation.status === 2 || selectedReservation.status === "Cancelled" || selectedReservation.status === "cancelled") && (
+                                    <button 
+                                        className="btn btn-success"
+                                        onClick={() => {
+                                            setShowDetailsModal(false);
+                                            handleRestoreReservation(selectedReservation.id);
+                                        }}
+                                        disabled={restoringId === selectedReservation.id}
+                                    >
+                                        {restoringId === selectedReservation.id ? "Geri Alınıyor..." : "Geri Al"}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
 
